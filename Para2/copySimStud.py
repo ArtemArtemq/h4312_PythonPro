@@ -8,18 +8,18 @@ class Student:
         self.alive = True
     def to_study(self):
         print("Time to study")
-        self.progress += 0.13
-        self.gladness -= 4.2
+        self.progress += 0.11
+        self.gladness -= 3
     def to_study_in_itStep(self):
         print("Time to study in itStep")
-        self.progress += 0.39
-        self.gladness -= 7.2
+        self.progress += 0.21
+        self.gladness -= 6.1
     def to_sleep(self):
         print("Time to sleep")
-        self.gladness += 1.8
+        self.gladness += 2.1
     def to_chill(self):
         print("Rest time")
-        self.gladness += 3.5
+        self.gladness += 4.5
         self.progress -= 0.1
     def is_alive(self):
         if self.progress < -0.5:
