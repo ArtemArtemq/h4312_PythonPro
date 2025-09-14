@@ -162,7 +162,7 @@ class Human:
         elif dice == 2:
             print("Start working")
             self.to_work()
-        elif dice == 3 and self.house.mess:
+        elif dice == 3 and self.house.mess > 0:
             print("Cleaning time!")
             self.to_clean_house()
         elif dice == 4:
