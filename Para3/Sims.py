@@ -112,7 +112,7 @@ class Human:
         print(f"Strength – {self.car.strength}")
     def is_alive(self):
         if self.gladness <= 0:
-            print("Depression...")
+            print("Depression....")
             return False
         elif self.satiety <= 0:
             print("Dead")
