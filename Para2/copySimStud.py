@@ -41,7 +41,7 @@ class Student:
         logging.debug(f"Progress = {round(self.progress, 2)}")
     def live(self, day):
         text_day = f"Day {day} of {self.name} live"
-        logging.debug(f"{text_day}:=^30")
+        logging.debug(f"{text_day:=^30}")
         cube = randint(1, 4)
         if cube == 1:
             self.to_sleep()
