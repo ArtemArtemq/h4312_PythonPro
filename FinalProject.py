@@ -44,7 +44,7 @@ class Wolf:
             self.add_mood(2.8)
             return True
         else:
-            self.health - (enemy_wolf.strength + enemy_wolf.mood) / health_divider
+            self.health -= (enemy_wolf.strength + enemy_wolf.mood) / health_divider
             self.mood -= 0.5
             return False
     def relax(self):
@@ -68,6 +68,10 @@ class Flock:
         self.average_mood = 0
         self.average_satiety = 0
         self.average_strength = 0
+        self.ex_average_health = 0
+        self.ex_average_mood = 0
+        self.ex_average_satiety = 0
+        self.ex_average_strength = 0
 
         for i in range(random.randint(4, 5)):
             wolf_health = random.randint(80, 100)
@@ -80,11 +84,11 @@ class Flock:
                             strength=wolf_strength)
             self.add_wolf(new_wolf)
     def add_wolf(self, wolf):
-        print(f"До нас приєднався новий вовк з силою {wolf.strength}")
+        print(f"До нас приєднався новий вовк з силою {round(wolf.strength, 2)}")
         wolf.index_in_flock = len(self.wolfs)
         self.wolfs.append(wolf)
     def remove_wolf(self, wolf):
-        print(f"Нажаль, нас покидає вовк з силою {wolf.strength}")
+        print(f"Нажаль, нас покидає вовк з силою {round(wolf.strength, 2)}")
         self.wolfs.pop(wolf.index_in_flock)
         index = 0
         for wolf in self.wolfs:
@@ -100,6 +104,11 @@ class Flock:
             max_mood += wolf.mood
             max_satiety += wolf.satiety
             max_strength += wolf.strength
+        self.ex_average_health = self.average_health
+        self.ex_average_mood = self.average_mood
+        self.ex_average_satiety = self.average_satiety
+        self.ex_average_strength = self.average_strength
+
         self.average_health = max_health / len(self.wolfs)
         self.average_mood = max_mood / len(self.wolfs)
         self.average_satiety = max_satiety / len(self.wolfs)
@@ -123,16 +132,19 @@ class Flock:
         wolf_index = 0
         for wolf in self.wolfs:
             if wolf_index < len(self.wolfs) - 1:
+                self.wolfs[wolf_index + 1].satiety -= 9.4
                 if wolf.fight(self.wolfs[wolf_index+1], 1.5) == True:
                     print(f"У {wolf_index + 1} бійці переміг {wolf_index + 1} вовк")
+                    self.wolfs[wolf_index + 1].health -= (wolf.strength + wolf.mood) / 1.5
                     self.wolfs[wolf_index + 1].mood -= 0.5
                 else:
                     print(f"У {wolf_index + 1} бійці переміг {wolf_index + 2} вовк")
             else:
                 wolf_index = 0
+                self.wolfs[wolf_index + 1].satiety -= 9.4
                 if wolf.fight(self.wolfs[wolf_index], 1.5) == True:
                     print(f"У {len(self.wolfs)} бійці переміг {len(self.wolfs)} вовк")
-                    self.wolfs[wolf_index + 1].health -= 0.5
+                    self.wolfs[wolf_index + 1].health -= (wolf.strength + wolf.mood) / 1.5
                     self.wolfs[wolf_index + 1].mood -= 0.5
                 else:
                     print(f"У {len(self.wolfs)} бійці переміг {wolf_index + 1} вовк")
@@ -142,18 +154,18 @@ class Flock:
             wolf.relax()
     # def to_fight
     def pick_active(self):
-        massage = "Оберіть активність на день:"
-        print(f"\n{massage:=^42}")
-        print("1: Піти на полювання                     (настрій+- ситість+ сила+-)")
-        print("2: Влаштувати несправжні бійки між собою (здоров'є- настрій+ ситість-- сила+)")
-        print("3: Відпочити в лігві                     (здоров'є+ настрій+)")
-        print("4: Піти на бійку з іншею зграєю          (здоров'є-- настрій+- ситість--)")
-        print("====Додатковий функціонал:")
-        print("5: Інформація о ворожиг зграй")
-        print("6: Інформація про кожного вовка зграї")
-        print("7: Довідка")
         is_choice_correct = False
         while (is_choice_correct == False):
+            massage = "Оберіть активність на день:"
+            print(f"\n{massage:=^42}")
+            print("1: Піти на полювання                     (настрій+- ситість+ сила+-)")
+            print("2: Влаштувати несправжні бійки між собою (здоров'є- настрій+ ситість-- сила+)")
+            print("3: Відпочити в лігві                     (здоров'є+ настрій+)")
+            print("4: Піти на бійку з іншею зграєю          (здоров'є-- настрій+- ситість--)")
+            print("====Додатковий функціонал:")
+            print("5: Інформація про ворожих зграях")
+            print("6: Інформація про кожного вовка зграї")
+            print("7: Довідка")
             try:
                 choice = int(input("Введіть номер, що будемо робити (1-7) "))
                 if choice == 1:
@@ -172,7 +184,7 @@ class Flock:
                     pass
                     is_choice_correct = False
                 elif choice == 6:
-                    pass
+                    self.print_wolfs_parameters()
                     is_choice_correct = False
                 elif choice == 7:
                     information()
@@ -181,6 +193,15 @@ class Flock:
                     raise ValueError
             except ValueError:
                 print("Ви мали обрати номер від 1 до 7!")
+    def print_wolfs_parameters(self):
+        print("\nПараметри кожного з вовків:")
+        for wolf in self.wolfs:
+            print(f"====Вовк номер {wolf.index_in_flock + 1}:")
+            print(f"Здоров'є: {round(wolf.health, 2)}")
+            print(f"Настрій: {round(wolf.mood, 2)}")
+            print(f"Ситість: {round(wolf.satiety, 2)}")
+            print(f"Сила: {round(wolf.strength, 2)}")
+
     def live(self, day_index):
         self.pick_active()
         self.calculate_values()
@@ -203,10 +224,30 @@ class Flock:
             return False
 
         print("Параметри вовків:")
-        print(f"Середнє здоров'є вовків: {round(self.average_health, 2)}")
-        print(f"Середній настрій вовків: {round(self.average_mood, 2)}")
-        print(f"Середня ситість вовків: {round(self.average_satiety, 2)}")
-        print(f"Середня сила вовків: {round(self.average_strength, 2)}")
+        dynamics_symbol = "  "
+        if self.average_health > self.ex_average_health:
+            dynamics_symbol = "⬆️"
+        elif self.average_health < self.ex_average_health:
+            dynamics_symbol = "⬇️"
+        print(f"{dynamics_symbol}Середнє здоров'є вовків: {round(self.average_health, 2)} ({round(self.ex_average_health, 2)})")
+        dynamics_symbol = "  "
+        if self.average_mood > self.ex_average_mood:
+            dynamics_symbol = "⬆️"
+        elif self.average_mood < self.ex_average_mood:
+            dynamics_symbol = "⬇️"
+        print(f"{dynamics_symbol}Середній настрій вовків: {round(self.average_mood, 2)} ({round(self.ex_average_mood, 2)})")
+        dynamics_symbol = "  "
+        if self.average_satiety > self.ex_average_satiety:
+            dynamics_symbol = "⬆️"
+        elif self.average_satiety < self.ex_average_satiety:
+            dynamics_symbol = "⬇️"
+        print(f"{dynamics_symbol}Середня ситість вовків: {round(self.average_satiety, 2)} ({round(self.ex_average_satiety, 2)})")
+        dynamics_symbol = "  "
+        if self.average_strength > self.ex_average_strength:
+            dynamics_symbol = "⬆️"
+        elif self.average_strength < self.ex_average_strength:
+            dynamics_symbol = "⬇️"
+        print(f"{dynamics_symbol}Середня сила вовків: {round(self.average_strength, 2)} ({round(self.ex_average_strength, 2)})")
         print(f"Кількість вовків у зграї: {len(self.wolfs)}")
         print(f"Кількість ворожих зграй: {self.number_enemy_flocks}")
         return True
