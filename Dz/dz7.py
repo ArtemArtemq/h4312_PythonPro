@@ -9,7 +9,7 @@ def calculate(expression):
         print("На нуль ділити не можна!")
         return
     except (NameError, SyntaxError):
-        print("Ви мали ввести математичний вираз!")
+        print("Ви мали ввести математичний вираз! ")
         return
 
 while (True):
