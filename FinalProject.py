@@ -37,6 +37,16 @@ class Wolf:
         else:
             self.mood -= 1
             return 0
+    def fight(self, enemy_wolf, health_divider):
+        self.satiety -= 9.4
+        self.add_strength(1.2)
+        if self.strength + self.mood > enemy_wolf.strength + enemy_wolf.mood:
+            self.add_mood(2.8)
+            return True
+        else:
+            self.health - (enemy_wolf.strength + enemy_wolf.mood) / health_divider
+            self.mood -= 0.5
+            return False
     def relax(self):
         self.add_mood(1.3)
         if self.satiety >= 60 and self.mood >= 7:
@@ -110,55 +120,67 @@ class Flock:
             wolf.add_satiety(prey_weight_for_everyone)
     def to_fake_fights(self):
         print("Вовки вирішили непосправжньому побитися між собою, щоб покращити свої навички")
-        fight_number = 0
         wolf_index = 0
-        for wolf_1 in self.wolfs:
-            if wolf_index % 2 == 0 and wolf_index + 1 <= len(self.wolfs) - 1:
-                fight_number += 1
-                wolf_2 = self.wolfs[wolf_index + 1]
-                if wolf_1.strength + wolf_1.mood > wolf_2.strength + wolf_2.mood:
-                    print(f"За резутьтатами {fight_number} битви переміг перший вовк")
-                    wolf_1.add_mood(2.8)
-                elif wolf_1.strength + wolf_1.mood < wolf_2.strength + wolf_2.mood:
-                    print(f"За резутьтатами {fight_number} битви переміг другий вовк")
-                    wolf_2.add_mood(2.8)
+        for wolf in self.wolfs:
+            if wolf_index < len(self.wolfs) - 1:
+                if wolf.fight(self.wolfs[wolf_index+1], 1.5) == True:
+                    print(f"У {wolf_index + 1} бійці переміг {wolf_index + 1} вовк")
+                    self.wolfs[wolf_index + 1].mood -= 0.5
                 else:
-                    print(f"За резутьтатами {fight_number} битви булі нічія")
-                    wolf_1.add_mood(0.2)
-                    wolf_2.add_mood(0.2)
-                wolf_1.satiety -= 9.4
-                wolf_2.satiety -= 9.4
-                wolf_1.add_strength(1.2)
-                wolf_2.add_strength(1.2)
-
+                    print(f"У {wolf_index + 1} бійці переміг {wolf_index + 2} вовк")
+            else:
+                wolf_index = 0
+                if wolf.fight(self.wolfs[wolf_index], 1.5) == True:
+                    print(f"У {len(self.wolfs)} бійці переміг {len(self.wolfs)} вовк")
+                    self.wolfs[wolf_index + 1].health -= 0.5
+                    self.wolfs[wolf_index + 1].mood -= 0.5
+                else:
+                    print(f"У {len(self.wolfs)} бійці переміг {wolf_index + 1} вовк")
             wolf_index += 1
     def to_relax(self):
         for wolf in self.wolfs:
             wolf.relax()
+    # def to_fight
     def pick_active(self):
         massage = "Оберіть активність на день:"
         print(f"\n{massage:=^42}")
         print("1: Піти на полювання                     (настрій+- ситість+ сила+-)")
-        print("2: Влаштувати несправжні бійки між собою (настрій+- ситість- сила+)")
+        print("2: Влаштувати несправжні бійки між собою (здоров'є- настрій+ ситість-- сила+)")
         print("3: Відпочити в лігві                     (здоров'є+ настрій+)")
-        print("4: Піти на бійку з іншею зграєю          (здоров'є- настрій+- ситість--)")
+        print("4: Піти на бійку з іншею зграєю          (здоров'є-- настрій+- ситість--)")
+        print("====Додатковий функціонал:")
+        print("5: Інформація о ворожиг зграй")
+        print("6: Інформація про кожного вовка зграї")
+        print("7: Довідка")
         is_choice_correct = False
         while (is_choice_correct == False):
             try:
-                choice = int(input("Введіть номер, що будемо робити (1-4) "))
+                choice = int(input("Введіть номер, що будемо робити (1-7) "))
                 if choice == 1:
                     self.to_hunting()
+                    is_choice_correct = True
                 elif choice == 2:
                     self.to_fake_fights()
+                    is_choice_correct = True
                 elif choice == 3:
                     self.to_relax()
+                    is_choice_correct = True
                 elif choice == 4:
                     pass
+                    is_choice_correct = True
+                elif choice == 5:
+                    pass
+                    is_choice_correct = False
+                elif choice == 6:
+                    pass
+                    is_choice_correct = False
+                elif choice == 7:
+                    information()
+                    is_choice_correct = False
                 else:
                     raise ValueError
-                is_choice_correct = True
             except ValueError:
-                print("Ви мали обрати номер від 1 до 4!")
+                print("Ви мали обрати номер від 1 до 7!")
     def live(self, day_index):
         self.pick_active()
         self.calculate_values()
@@ -188,6 +210,21 @@ class Flock:
         print(f"Кількість вовків у зграї: {len(self.wolfs)}")
         print(f"Кількість ворожих зграй: {self.number_enemy_flocks}")
         return True
+class EnemyFlock:
+    def __init__(self, strength=10, health=100):
+        self.strength = strength
+        self.health = health
+    def fight(self, enemy_strength):
+        if self.health - enemy_strength > 0:
+            self.health -= enemy_strength
+            return True
+        else:
+            return False
+
+def information():
+    print("Привіт, це гра про зграю вовків, якою ти будеш керувати!")
+
+information()
 
 flock = Flock()
 for day_index in range(61):
